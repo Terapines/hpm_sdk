@@ -22,7 +22,7 @@ else()
     sdk_clear_compile_options()
 endif()
 
-set(opt_string "-O3 -fno-inline -fmessage-length=0 -Wno-implicit-int -Wno-implicit-function-declaration -Wno-return-type -Wno-deprecated-non-prototype -Wno-strict-prototypes -fno-builtin-printf -fbuiltin")
+set(opt_string "-O3 -flto -fno-inline -fmessage-length=0 -Wno-implicit-int -Wno-implicit-function-declaration -Wno-return-type -Wno-deprecated-non-prototype -Wno-strict-prototypes -fno-builtin-printf -fbuiltin")
 separate_arguments(opt_list UNIX_COMMAND ${opt_string})
 foreach(opt ${opt_list})
     sdk_compile_options(${opt})
