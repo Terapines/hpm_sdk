@@ -1,0 +1,197 @@
+/*
+ * Copyright (c) 2021 HPMicro
+ *
+ * SPDX-License-Identifier: BSD-3-Clause
+ *
+ */
+
+#include <stdio.h>
+#include "board.h"
+#include "hpm_debug_console.h"
+
+#define LED_FLASH_PERIOD_IN_MS 300
+
+float a, b, c;
+int d, e, f;
+
+__attribute__((noinline)) float test_fadd(float a, float b)
+{
+    float result = a + b;
+    return result;
+}
+
+SDK_DECLARE_EXT_ISR_M(IRQn_GPIO0_Y, isr_test_fadd)
+void isr_test_fadd(void) {
+    float result = test_fadd(3.0, 4.0);
+}
+
+__attribute__((noinline)) float test_fadd_inlineasm(float a, float b)
+{
+    float result;
+    __asm__ volatile (
+        "fadd.s fa0, fa1, fa2" ::: "fa0", "fa1", "fa2");
+    return result;
+}
+
+SDK_DECLARE_EXT_ISR_M(IRQn_GPIO0_A, isr_test_fadd_inlineasm)
+void isr_test_fadd_inlineasm(void) {
+    float result = test_fadd_inlineasm(3.0, 4.0);
+}
+
+SDK_DECLARE_EXT_ISR_M(IRQn_GPIO0_B, isr_test_fcsr)
+void isr_test_fcsr(void) {
+    a = b + c;
+}
+
+SDK_DECLARE_EXT_ISR_M(IRQn_GPIO0_C, isr_test_fcsr_inlineasm)
+void isr_test_fcsr_inlineasm(void) {
+    __asm__ volatile (
+        "fadd.s fa0, fa1, fa2" ::: "fa0", "fa1", "fa2");
+}
+
+SDK_DECLARE_EXT_ISR_M(IRQn_GPIO0_D, isr_test_nofcsr)
+void isr_test_nofcsr(void) {
+    d = e + f;
+}
+
+__attribute__((noinline)) void test_tp()
+{
+    __asm__ volatile ("add a0, a0, tp" ::: "a0", "tp");
+}
+
+SDK_DECLARE_EXT_ISR_M(IRQn_GPIO0_E, isr_test_tp)
+void isr_test_tp(void) {
+    test_tp();
+}
+
+__attribute__((noinline)) float test_recursive(float a, float b, int n) {
+    if (n <= 0) {
+        return a + b;
+    }
+
+    float tmp = (a * 0.9f) + (b * 1.1f);
+    return tmp + test_recursive(a, b, n - 1);
+}
+
+// Recursive function will save all registers now.
+SDK_DECLARE_EXT_ISR_M(IRQn_GPIO0_F, isr_test_recursive)
+void isr_test_recursive(void) {
+    float result = test_recursive(3.0, 4.0, 10);
+}
+
+__attribute__((noinline)) int test_add(int a, int b)
+{
+    int result = a + b;
+    return result;
+}
+
+SDK_DECLARE_EXT_ISR_M(IRQn_GPIO0_X, isr_test_add)
+void isr_test_add(void) {
+    int result = test_add(3.0, 4.0);
+}
+
+__attribute__((noinline)) int test_add_inlineasm(int a, int b)
+{
+    int result;
+    __asm__ volatile (
+        "add a0, a1, a2" ::: "a0", "a1", "a2");
+    return result;
+}
+
+SDK_DECLARE_EXT_ISR_M(IRQn_GPTMR0, isr_test_add_inlineasm)
+void isr_test_add_inlineasm(void) {
+    int result = test_add_inlineasm(3.0, 4.0);
+}
+
+__attribute__((noinline)) void test_fadd_inner()
+{
+    a = b + c;
+}
+
+__attribute__((noinline)) void test_fadd_outer()
+{
+    test_fadd_inner();
+}
+
+SDK_DECLARE_EXT_ISR_M(IRQn_GPTMR1, isr_test_fadd_outer)
+void isr_test_fadd_outer(void) {
+    test_fadd_outer();
+}
+
+__attribute__((noinline)) void test_fadd_inner_inlineasm()
+{
+    __asm__ volatile (
+        "fadd.s fa0, fa1, fa2" ::: "fa0", "fa1", "fa2");
+}
+
+__attribute__((noinline)) void test_fadd_outer_inlineasm()
+{
+    test_fadd_inner_inlineasm();
+}
+
+SDK_DECLARE_EXT_ISR_M(IRQn_GPTMR2, isr_test_fadd_outer_inlineasm)
+void isr_test_fadd_outer_inlineasm(void) {
+    test_fadd_outer_inlineasm();
+}
+
+__attribute__((noinline)) void test_add_inner()
+{
+    d = e + f;
+}
+
+__attribute__((noinline)) void test_add_outer()
+{
+    test_add_inner();
+}
+
+SDK_DECLARE_EXT_ISR_M(IRQn_GPTMR3, isr_test_add_outer)
+void isr_test_add_outer(void) {
+    test_add_outer();
+}
+
+__attribute__((noinline)) void test_add_inner_inlineasm()
+{
+    __asm__ volatile (
+        "add a0, a1, a2" ::: "a0", "a1", "a2");
+}
+
+__attribute__((noinline)) void test_add_outer_inlineasm()
+{
+    test_add_inner_inlineasm();
+}
+
+SDK_DECLARE_EXT_ISR_M(IRQn_UART0, isr_test_add_outer_inlineasm)
+void isr_test_add_outer_inlineasm(void) {
+    test_add_outer_inlineasm();
+}
+
+SDK_DECLARE_EXT_ISR_M(IRQn_UART2, isr_test_nocall)
+void isr_test_nocall(void) {
+    a = b + c;
+    d = e + f;
+}
+
+SDK_DECLARE_EXT_ISR_M(IRQn_UART3, isr_test_unknowncall)
+void isr_test_unknowncall(void) {
+    printf("hello world\n");
+}
+
+int main(void)
+{
+    int u;
+    board_init();
+    board_init_led_pins();
+
+    board_timer_create(LED_FLASH_PERIOD_IN_MS, board_led_toggle);
+
+    printf("hello world\n");
+    while(1)
+    {
+        u = getchar();
+        if (u == '\r') {
+            u = '\n';
+        }
+        printf("%c", u);
+    }
+    return 0;
+}

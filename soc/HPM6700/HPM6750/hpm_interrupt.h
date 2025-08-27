@@ -423,6 +423,66 @@ ATTR_ALWAYS_INLINE static inline void uninstall_isr(uint32_t irq)
              c.flwsp ft10, 40*4 \n\
              c.flwsp ft11, 41*4 \n");\
 }
+#elif defined(_ZCC_IRQ_SAVE_RESTORE)
+#if _ZCC_IRQ_SAVE_RESTORE_FPR == 0
+#define CONTEXT_REG_NUM_FPR32 HPM_ALIGN_UP((4 * 20), 16)
+#define SAVE_FPU_CONTEXT()  { \
+    __asm volatile("addi sp, sp, %0" : : "i"(-CONTEXT_REG_NUM_FPR32) :);\
+    __asm volatile("\n\
+             c.fswsp ft0,  0*4(sp)\n\
+             c.fswsp ft1,  1*4(sp) \n\
+             c.fswsp ft2,  2*4(sp) \n\
+             c.fswsp ft3,  3*4(sp) \n\
+             c.fswsp ft4,  4*4(sp) \n\
+             c.fswsp ft5,  5*4(sp) \n\
+             c.fswsp ft6,  6*4(sp) \n\
+             c.fswsp ft7,  7*4(sp) \n\
+             c.fswsp fa0,  8*4(sp) \n\
+             c.fswsp fa1,  9*4(sp) \n\
+             c.fswsp fa2,  10*4(sp) \n\
+             c.fswsp fa3,  11*4(sp) \n\
+             c.fswsp fa4,  12*4(sp) \n\
+             c.fswsp fa5,  13*4(sp) \n\
+             c.fswsp fa6,  14*4(sp) \n\
+             c.fswsp fa7,  15*4(sp) \n\
+             c.fswsp ft8,  16*4(sp) \n\
+             c.fswsp ft9,  17*4(sp) \n\
+             c.fswsp ft10, 18*4(sp) \n\
+             c.fswsp ft11, 19*4(sp) \n");\
+}
+
+/*
+ * Restore FPU caller registers:
+ * NOTE: To simplify the logic, the FPU caller registers are always stored at word offset 22 in the stack
+ */
+#define RESTORE_FPU_CONTEXT() { \
+    __asm volatile("\n\
+             c.flwsp ft0,  0*4(sp)\n\
+             c.flwsp ft1,  1*4(sp) \n\
+             c.flwsp ft2,  2*4(sp) \n\
+             c.flwsp ft3,  3*4(sp) \n\
+             c.flwsp ft4,  4*4(sp) \n\
+             c.flwsp ft5,  5*4(sp) \n\
+             c.flwsp ft6,  6*4(sp) \n\
+             c.flwsp ft7,  7*4(sp) \n\
+             c.flwsp fa0,  8*4(sp) \n\
+             c.flwsp fa1,  9*4(sp) \n\
+             c.flwsp fa2,  10*4(sp) \n\
+             c.flwsp fa3,  11*4(sp) \n\
+             c.flwsp fa4,  12*4(sp) \n\
+             c.flwsp fa5,  13*4(sp) \n\
+             c.flwsp fa6,  14*4(sp) \n\
+             c.flwsp fa7,  15*4(sp) \n\
+             c.flwsp ft8,  16*4(sp) \n\
+             c.flwsp ft9,  17*4(sp) \n\
+             c.flwsp ft10, 18*4(sp) \n\
+             c.flwsp ft11, 19*4(sp) \n");\
+    __asm volatile("addi sp, sp, %0" : : "i"(CONTEXT_REG_NUM_FPR32) :);\
+}
+#else
+#define SAVE_FPU_CONTEXT()
+#define RESTORE_FPU_CONTEXT()
+#endif
 #else /* __ICCRISCV__ not defined */
 #define SAVE_FPU_CONTEXT()  { \
     __asm volatile("\n\
@@ -529,6 +589,66 @@ ATTR_ALWAYS_INLINE static inline void uninstall_isr(uint32_t irq)
              c.fldsp ft10, 58*4 \n\
              c.fldsp ft11, 60*4 \n");\
 }
+#elif defined(_ZCC_IRQ_SAVE_RESTORE)
+#if _ZCC_IRQ_SAVE_RESTORE_FPR == 0
+#define CONTEXT_REG_NUM_FPR64 HPM_ALIGN_UP((4 * 20 * 2), 16)
+#define SAVE_FPU_CONTEXT()  { \
+    __asm volatile("addi sp, sp, %0" : : "i"(-CONTEXT_REG_NUM_FPR64) :);\
+    __asm volatile("\n\
+             c.fsdsp ft0,  0*4(sp)\n\
+             c.fsdsp ft1,  2*4(sp) \n\
+             c.fsdsp ft2,  4*4(sp) \n\
+             c.fsdsp ft3,  6*4(sp) \n\
+             c.fsdsp ft4,  8*4(sp) \n\
+             c.fsdsp ft5,  10*4(sp) \n\
+             c.fsdsp ft6,  12*4(sp) \n\
+             c.fsdsp ft7,  14*4(sp) \n\
+             c.fsdsp fa0,  16*4(sp) \n\
+             c.fsdsp fa1,  18*4(sp) \n\
+             c.fsdsp fa2,  20*4(sp) \n\
+             c.fsdsp fa3,  22*4(sp) \n\
+             c.fsdsp fa4,  24*4(sp) \n\
+             c.fsdsp fa5,  26*4(sp) \n\
+             c.fsdsp fa6,  28*4(sp) \n\
+             c.fsdsp fa7,  30*4(sp) \n\
+             c.fsdsp ft8,  32*4(sp) \n\
+             c.fsdsp ft9,  34*4(sp) \n\
+             c.fsdsp ft10, 36*4(sp) \n\
+             c.fsdsp ft11, 38*4(sp) \n");\
+}
+
+/*
+ * Restore FPU caller registers:
+ * NOTE: To simplify the logic, the FPU caller registers are always stored at word offset 22 in the stack
+ */
+#define RESTORE_FPU_CONTEXT() { \
+    __asm volatile("\n\
+             c.fldsp ft0,  0*4(sp)\n\
+             c.fldsp ft1,  2*4(sp) \n\
+             c.fldsp ft2,  4*4(sp) \n\
+             c.fldsp ft3,  6*4(sp) \n\
+             c.fldsp ft4,  8*4(sp) \n\
+             c.fldsp ft5,  10*4(sp) \n\
+             c.fldsp ft6,  12*4(sp) \n\
+             c.fldsp ft7,  14*4(sp) \n\
+             c.fldsp fa0,  16*4(sp) \n\
+             c.fldsp fa1,  18*4(sp) \n\
+             c.fldsp fa2,  20*4(sp) \n\
+             c.fldsp fa3,  22*4(sp) \n\
+             c.fldsp fa4,  24*4(sp) \n\
+             c.fldsp fa5,  26*4(sp) \n\
+             c.fldsp fa6,  28*4(sp) \n\
+             c.fldsp fa7,  30*4(sp) \n\
+             c.fldsp ft8,  32*4(sp) \n\
+             c.fldsp ft9,  34*4(sp) \n\
+             c.fldsp ft10, 36*4(sp) \n\
+             c.fldsp ft11, 38*4(sp) \n");\
+     __asm volatile("addi sp, sp, %0" : : "i"(CONTEXT_REG_NUM_FPR64) :);\
+}
+#else
+#define SAVE_FPU_CONTEXT()
+#define RESTORE_FPU_CONTEXT()
+#endif
 #else /*__riscv_flen == 64*/
 #define SAVE_FPU_CONTEXT()  { \
     __asm volatile("\n\
@@ -650,6 +770,73 @@ ATTR_ALWAYS_INLINE static inline void uninstall_isr(uint32_t irq)
         RESTORE_FPU_CONTEXT(); \
         __asm volatile("addi sp, sp, %0" : : "i"(CONTEXT_REG_NUM) :);\
 }
+#elif defined(_ZCC_IRQ_SAVE_RESTORE)
+#if _ZCC_IRQ_SAVE_RESTORE_GPR == 0
+/**
+ * @brief Save the caller registers based on the RISC-V ABI specification
+ */
+#define CONTEXT_REG_NUM_GPR HPM_ALIGN_UP((4 * 22), 16)
+#define SAVE_CALLER_CONTEXT()   { \
+    __asm volatile("addi sp, sp, %0" : : "i"(-CONTEXT_REG_NUM_GPR) :);\
+    __asm volatile("\n\
+            c.swsp ra,  0*4(sp) \n\
+            c.swsp t0,  1*4(sp) \n\
+            c.swsp t1,  2*4(sp) \n\
+            c.swsp t2,  3*4(sp) \n\
+            c.swsp s1,  4*4(sp) \n\
+            c.swsp a0,  5*4(sp) \n\
+            c.swsp a1,  6*4(sp) \n\
+            c.swsp a2,  7*4(sp) \n\
+            c.swsp a3,  8*4(sp) \n\
+            c.swsp a4,  9*4(sp) \n\
+            c.swsp a5, 10*4(sp) \n\
+            c.swsp a6, 11*4(sp) \n\
+            c.swsp a7, 12*4(sp) \n\
+            c.swsp s2, 13*4(sp) \n\
+            c.swsp s3, 14*4(sp) \n\
+            c.swsp s4, 15*4(sp) \n\
+            c.swsp s5, 16*4(sp) \n\
+            c.swsp s6, 17*4(sp) \n\
+            c.swsp t3, 18*4(sp) \n\
+            c.swsp t4, 19*4(sp) \n\
+            c.swsp t5, 20*4(sp) \n\
+            c.swsp t6, 21*4(sp)"); \
+}
+
+/**
+ * @brief Restore the caller registers based on the RISC-V ABI specification
+ */
+#define RESTORE_CALLER_CONTEXT() { \
+        __asm volatile("\n\
+            c.lwsp ra,  0*4(sp) \n\
+            c.lwsp t0,  1*4(sp) \n\
+            c.lwsp t1,  2*4(sp) \n\
+            c.lwsp t2,  3*4(sp) \n\
+            c.lwsp s1,  4*4(sp) \n\
+            c.lwsp a0,  5*4(sp) \n\
+            c.lwsp a1,  6*4(sp) \n\
+            c.lwsp a2,  7*4(sp) \n\
+            c.lwsp a3,  8*4(sp) \n\
+            c.lwsp a4,  9*4(sp) \n\
+            c.lwsp a5, 10*4(sp) \n\
+            c.lwsp a6, 11*4(sp) \n\
+            c.lwsp a7, 12*4(sp) \n\
+            c.lwsp s2, 13*4(sp) \n\
+            c.lwsp s3, 14*4(sp) \n\
+            c.lwsp s4, 15*4(sp) \n\
+            c.lwsp s5, 16*4(sp) \n\
+            c.lwsp s6, 17*4(sp) \n\
+            c.lwsp t3, 18*4(sp) \n\
+            c.lwsp t4, 19*4(sp) \n\
+            c.lwsp t5, 20*4(sp) \n\
+            c.lwsp t6, 21*4(sp) \n");\
+        __asm volatile("addi sp, sp, %0" : : "i"(CONTEXT_REG_NUM_GPR) :);\
+}
+#else
+#define SAVE_CALLER_CONTEXT()
+#define RESTORE_CALLER_CONTEXT()
+#endif
+
 #else
 /**
  * @brief Save the caller registers based on the RISC-V ABI specification
@@ -715,6 +902,8 @@ ATTR_ALWAYS_INLINE static inline void uninstall_isr(uint32_t irq)
 #endif
 
 #ifdef __riscv_flen
+#if defined(_ZCC_IRQ_SAVE_RESTORE)
+#if _ZCC_IRQ_SAVE_RESTORE_FPR == 0
 #define SAVE_FPU_STATE() { \
         __asm volatile("frcsr s1\n"); \
 }
@@ -724,10 +913,26 @@ ATTR_ALWAYS_INLINE static inline void uninstall_isr(uint32_t irq)
 }
 #else
 #define SAVE_FPU_STATE()
+
+#define RESTORE_FPU_STATE()
+#endif
+#else
+#define SAVE_FPU_STATE() { \
+        __asm volatile("frcsr s1\n"); \
+}
+
+#define RESTORE_FPU_STATE() { \
+        __asm volatile("fscsr s1\n"); \
+}
+#endif
+#else
+#define SAVE_FPU_STATE()
 #define RESTORE_FPU_STATE()
 #endif
 
 #ifdef __riscv_dsp
+#if defined(_ZCC_IRQ_SAVE_RESTORE)
+#if _ZCC_IRQ_SAVE_RESTORE_GPR == 0
 /*
  * @brief Save DSP context
  */
@@ -740,12 +945,43 @@ ATTR_ALWAYS_INLINE static inline void uninstall_isr(uint32_t irq)
 #define RESTORE_DSP_CONTEXT() {\
        __asm volatile("csrw %0, s4\n" ::"i"(CSR_UCODE):); \
 }
+#else
+#define SAVE_DSP_CONTEXT()
+
+#define RESTORE_DSP_CONTEXT()
+#endif
+
+#else
+/*
+ * @brief Save DSP context
+ */
+#define SAVE_DSP_CONTEXT() { \
+        __asm volatile("csrrs s4, %0, x0\n" ::"i"(CSR_UCODE):);  \
+}
+/*
+ * @brief Restore DSP context
+ */
+#define RESTORE_DSP_CONTEXT() {\
+       __asm volatile("csrw %0, s4\n" ::"i"(CSR_UCODE):); \
+}
+#endif
 
 #else
 #define SAVE_DSP_CONTEXT()
 #define RESTORE_DSP_CONTEXT()
 #endif
 
+#if defined(_ZCC_IRQ_SAVE_RESTORE)
+#define SAVE_MCCTL_CONTEXT() { \
+        __asm volatile("csrrs s5, %0, x0\n" ::"i"(CSR_MCCTLBEGINADDR): "s5");  \
+        __asm volatile("csrrs s6, %0, x0\n" ::"i"(CSR_MCCTLDATA): "s6");  \
+}
+
+#define RESTORE_MCCTL_CONTEXT() {\
+        __asm volatile("csrw %0, s6\n" ::"i"(CSR_MCCTLDATA):); \
+        __asm volatile("csrw %0, s5\n" ::"i"(CSR_MCCTLBEGINADDR):); \
+}
+#else
 /*
  * @brief Save MCCTL context
  */
@@ -760,6 +996,7 @@ ATTR_ALWAYS_INLINE static inline void uninstall_isr(uint32_t irq)
         __asm volatile("csrw %0, s6\n" ::"i"(CSR_MCCTLDATA):); \
         __asm volatile("csrw %0, s5\n" ::"i"(CSR_MCCTLBEGINADDR):); \
 }
+#endif
 
 /*
  * @brief Enter Nested IRQ Handling
@@ -769,6 +1006,33 @@ ATTR_ALWAYS_INLINE static inline void uninstall_isr(uint32_t irq)
  *       MSTATUS = word offset 18
  *       MXSTATUS = word offset 19
  */
+#if defined(_ZCC_IRQ_SAVE_RESTORE)
+#define ENTER_NESTED_IRQ_HANDLING_M() { \
+    __asm volatile("\n\
+            csrr s2, mepc    \n\
+            csrr s3, mstatus \n" ::: "s2", "s3");\
+    SAVE_FPU_STATE(); \
+    SAVE_DSP_CONTEXT(); \
+    SAVE_MCCTL_CONTEXT(); \
+    __asm volatile("csrsi mstatus, 8"); \
+}
+
+#define COMPLETE_IRQ_HANDLING_M(irq_num) { \
+    __asm volatile("csrci mstatus, 8"); \
+    __asm volatile("lui a4, 0xe4200" ::: "a4"); \
+    __asm volatile("li a3, %0" : : "i" (irq_num) : "a3"); \
+    __asm volatile("sw a3, 4(a4)"); \
+}
+
+#define EXIT_NESTED_IRQ_HANDLING_M() { \
+    __asm volatile("\n\
+            csrw mstatus, s3 \n\
+            csrw mepc, s2 \n");\
+            RESTORE_FPU_STATE(); \
+            RESTORE_DSP_CONTEXT(); \
+            RESTORE_MCCTL_CONTEXT(); \
+}
+#else
 #define ENTER_NESTED_IRQ_HANDLING_M() { \
     __asm volatile("\n\
             csrr s2, mepc    \n\
@@ -805,6 +1069,7 @@ ATTR_ALWAYS_INLINE static inline void uninstall_isr(uint32_t irq)
             RESTORE_DSP_CONTEXT(); \
             RESTORE_MCCTL_CONTEXT(); \
 }
+#endif
 
 /* @brief Nested IRQ entry macro : Save CSRs and enable global irq. */
 #define NESTED_IRQ_ENTER()                              \
@@ -847,6 +1112,22 @@ void FREERTOS_VECTOR_ISR_WRAPPER_NAME(irq_num)(void) \
     isr();\
 }
 
+#elif defined(_ZCC_IRQ_SAVE_RESTORE)
+#define SDK_DECLARE_EXT_ISR_M(irq_num, isr) \
+void isr(void) __attribute__((section(".isr_vector")));\
+HPM_EXTERN_C HPM_ATTR_MACHINE_INTERRUPT void ISR_NAME_M(irq_num)(void);\
+HPM_ATTR_MACHINE_INTERRUPT void ISR_NAME_M(irq_num)(void)  \
+{ \
+    SAVE_CALLER_CONTEXT(); \
+    SAVE_FPU_CONTEXT(); \
+    ENTER_NESTED_IRQ_HANDLING_M();\
+    __asm volatile("la t1, %0\n\t" : : "i" (isr) : "t1");\
+    __asm volatile("jalr t1\n" ::: "ra");\
+    COMPLETE_IRQ_HANDLING_M(irq_num);\
+    EXIT_NESTED_IRQ_HANDLING_M();\
+    RESTORE_FPU_CONTEXT(); \
+    RESTORE_CALLER_CONTEXT();\
+}
 #else
 #define SDK_DECLARE_EXT_ISR_M(irq_num, isr) \
 void isr(void) __attribute__((section(".isr_vector")));\
