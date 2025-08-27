@@ -176,6 +176,20 @@ void isr_test_unknowncall(void) {
     printf("hello world\n");
 }
 
+#ifdef __riscv_dsp
+SDK_DECLARE_EXT_ISR_M(IRQn_UART4, isr_test_ucode)
+void isr_test_ucode(void) {
+    d = __builtin_riscv_mulsr64(e, f);
+}
+
+// Unable to analyze p instruction in inline asm, so ucode is not saved.
+SDK_DECLARE_EXT_ISR_M(IRQn_UART5, isr_test_ucode_inlineasm)
+void isr_test_ucode_inlineasm(void) {
+    __asm__ volatile (
+        "smal a0, a0, a2" ::: "a0", "a1", "a2", "a3");
+}
+#endif
+
 int main(void)
 {
     int u;

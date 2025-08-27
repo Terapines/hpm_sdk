@@ -903,7 +903,7 @@ ATTR_ALWAYS_INLINE static inline void uninstall_isr(uint32_t irq)
 
 #ifdef __riscv_flen
 #if defined(_ZCC_IRQ_SAVE_RESTORE)
-#if _ZCC_IRQ_SAVE_RESTORE_FPR == 0
+#if _ZCC_IRQ_SAVE_RESTORE_GPR == 0
 #define SAVE_FPU_STATE() { \
         __asm volatile("frcsr s1\n"); \
 }
