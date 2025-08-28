@@ -4,13 +4,13 @@
 cmake_minimum_required(VERSION 3.13)
 
 set(RV_ABI "ilp32d")
-set(RV_ARCH "rv32gc")
+set(RV_ARCH "rv32gc_zp052b")
 
 find_package(hpm-sdk REQUIRED HINTS $ENV{HPM_SDK_BASE})
 
 project(irq_save_restore)
 
-sdk_compile_options("-mirq-save-restore=none")
+sdk_compile_options("-mirq-save-restore=gpr-used,fpr-used")
 
 sdk_app_src(src/test.c)
 generate_ide_projects()
