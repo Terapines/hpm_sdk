@@ -6,6 +6,7 @@
  */
 
 /*
+ * NOTE: This test only supported in hpm6750evkmini.
  * This file contains test for irq save/restore feature in zcc.
  * 1. isr_test_fadd: call a function with float instruction
  * 2. isr_test_fadd_inlineasm: use inline asm with float instruction
