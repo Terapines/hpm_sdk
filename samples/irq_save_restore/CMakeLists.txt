@@ -10,7 +10,11 @@ find_package(hpm-sdk REQUIRED HINTS $ENV{HPM_SDK_BASE})
 
 project(irq_save_restore)
 
+sdk_compile_options("-O3")
+# Disable tail call untill bug is fixed in zcc.
+sdk_compile_options("-fno-optimize-sibling-calls")
+sdk_compile_options("-flto")
 sdk_compile_options("-mirq-save-restore=gpr-used,fpr-used")
 
-sdk_app_src(src/test.c src/unknowncall.S)
+sdk_app_src(src/test.c src/unknowncall.S src/knowncall.c)
 generate_ide_projects()

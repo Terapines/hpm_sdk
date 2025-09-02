@@ -217,6 +217,13 @@ void isr_test_unknowncall(void)
     unknowncall();
 }
 
+extern void knowncall();
+SDK_DECLARE_EXT_ISR_M(IRQn_UART7, isr_test_knowncall)
+void isr_test_knowncall(void)
+{
+    knowncall();
+}
+
 typedef void (*foo_t)();
 foo_t fp;
 SDK_DECLARE_EXT_ISR_M(IRQn_UART4, isr_test_unknowncall_fp)
