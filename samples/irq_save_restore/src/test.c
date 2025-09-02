@@ -23,9 +23,10 @@
  * 13. isr_test_add_outer_inlineasm: call a function which calls another function with add instruction in inline asm
  * 14. isr_test_nocall: no function call, only use add and fadd instruction directly in isr
  * 15. isr_test_unknowncall: call an unknown function
- * 16. isr_test_unknowncall_fp: call an unknown function through function pointer
- * 17. isr_test_ucode: call a function with dsp instruction
- * 18. isr_test_ucode_inlineasm: use inline asm with dsp instruction
+ * 16. isr_test_unknowncall: call an known external function
+ * 17. isr_test_unknowncall_fp: call an unknown function through function pointer
+ * 18. isr_test_ucode: call a function with dsp instruction
+ * 19. isr_test_ucode_inlineasm: use inline asm with dsp instruction
  */
 
 #include <stdio.h>
@@ -36,17 +37,19 @@
 
 float a, b, c;
 int d, e, f;
+float f_result;
+int i_result;
 
 __attribute__((noinline)) float test_fadd(float a, float b)
 {
-    float result = a + b;
-    return result;
+    f_result = a + b;
+    return f_result;
 }
 
 SDK_DECLARE_EXT_ISR_M(IRQn_GPIO0_Y, isr_test_fadd)
 void isr_test_fadd(void)
 {
-    float result = test_fadd(3.0, 4.0);
+    f_result = test_fadd(3.0, 4.0);
 }
 
 __attribute__((noinline)) float test_fadd_inlineasm(float a, float b)
@@ -60,7 +63,7 @@ __attribute__((noinline)) float test_fadd_inlineasm(float a, float b)
 SDK_DECLARE_EXT_ISR_M(IRQn_GPIO0_A, isr_test_fadd_inlineasm)
 void isr_test_fadd_inlineasm(void)
 {
-    float result = test_fadd_inlineasm(3.0, 4.0);
+    f_result = test_fadd_inlineasm(3.0, 4.0);
 }
 
 SDK_DECLARE_EXT_ISR_M(IRQn_GPIO0_B, isr_test_fcsr)
@@ -108,19 +111,19 @@ __attribute__((noinline)) float test_recursive(float a, float b, int n)
 SDK_DECLARE_EXT_ISR_M(IRQn_GPIO0_F, isr_test_recursive)
 void isr_test_recursive(void)
 {
-    float result = test_recursive(3.0, 4.0, 10);
+    f_result = test_recursive(3.0, 4.0, 10);
 }
 
 __attribute__((noinline)) int test_add(int a, int b)
 {
-    int result = a + b;
-    return result;
+    i_result = a + b;
+    return i_result;
 }
 
 SDK_DECLARE_EXT_ISR_M(IRQn_GPIO0_X, isr_test_add)
 void isr_test_add(void)
 {
-    int result = test_add(3.0, 4.0);
+    i_result = test_add(3.0, 4.0);
 }
 
 __attribute__((noinline)) int test_add_inlineasm(int a, int b)
@@ -134,7 +137,7 @@ __attribute__((noinline)) int test_add_inlineasm(int a, int b)
 SDK_DECLARE_EXT_ISR_M(IRQn_GPTMR0, isr_test_add_inlineasm)
 void isr_test_add_inlineasm(void)
 {
-    int result = test_add_inlineasm(3.0, 4.0);
+    i_result = test_add_inlineasm(3.0, 4.0);
 }
 
 __attribute__((noinline)) void test_fadd_inner()
