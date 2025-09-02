@@ -12,5 +12,5 @@ project(irq_save_restore)
 
 sdk_compile_options("-mirq-save-restore=gpr-used,fpr-used")
 
-sdk_app_src(src/test.c)
+sdk_app_src(src/test.c src/unknowncall.S)
 generate_ide_projects()

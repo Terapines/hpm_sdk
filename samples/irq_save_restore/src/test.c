@@ -210,10 +210,11 @@ void isr_test_nocall(void)
     d = e + f;
 }
 
+extern void unknowncall();
 SDK_DECLARE_EXT_ISR_M(IRQn_UART3, isr_test_unknowncall)
 void isr_test_unknowncall(void)
 {
-    printf("hello world\n");
+    unknowncall();
 }
 
 typedef void (*foo_t)();
