@@ -71,11 +71,13 @@ __attribute__((weak)) void c_startup(void)
         *(__fast_ram_bss_start__ + i) = 0;
     }
 
+#ifndef TPT_COMPRESS_DATA
     /* data section LMA: etext */
     size = __data_end__ - __data_start__;
     for (i = 0; i < size; i++) {
         *(__data_start__ + i) = *(__data_load_addr__ + i);
     }
+#endif
 
     /* ramfunc section LMA: etext + data length */
     size = __ramfunc_end__ - __ramfunc_start__;

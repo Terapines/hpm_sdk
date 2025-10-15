@@ -89,6 +89,8 @@ SECTIONS
         . = ALIGN(8);
     } > ILM
 
+    .tpt.compress.data : { *(.tpt.compress.data) }  > ILM
+
     .eh_frame :
     {
         __eh_frame_start = .;
