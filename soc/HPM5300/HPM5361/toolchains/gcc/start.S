@@ -54,10 +54,6 @@ _start:
     call l1c_dc_invalidate_all
 #endif
 
-#ifdef TPT_COMPRESS_DATA
-    call __tpt_uncompress_data
-#endif
-
     /*
      * Initialize LMA/VMA sections.
      * Relocation for any sections that need to be copied from LMA to VMA.

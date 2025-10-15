@@ -71,7 +71,11 @@ __attribute__((weak)) void c_startup(void)
         *(__fast_ram_bss_start__ + i) = 0;
     }
 
-#ifndef TPT_COMPRESS_DATA
+#ifdef TPT_COMPRESS_DATA
+    /* use __tpt_uncompress_data to decompress data section. */
+    extern void __tpt_uncompress_data();
+    __tpt_uncompress_data();
+#else
     /* data section LMA: etext */
     size = __data_end__ - __data_start__;
     for (i = 0; i < size; i++) {
